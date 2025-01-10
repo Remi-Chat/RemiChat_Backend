@@ -220,5 +220,5 @@ func HandleSendMessage(conn *websocket.Conn, msg *models.Message, user *models.U
 		Type:    NewMessage,
 		Content: string(responseBytes),
 	}
-	Pool.Broadcast(messageData.ChannelID, broadcastMsg, nil) // Send to all users including sender
+	Pool.Broadcast(messageData.ChannelID, broadcastMsg, nil)
 }
