@@ -7,7 +7,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// RegisterAuthRoutes sets up authentication routes
 func UserRoutes(router *gin.Engine) {
 	userGroup := router.Group("/auth")
 	userGroup.Use(middleware.AuthMiddleware())

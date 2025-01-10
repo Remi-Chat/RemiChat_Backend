@@ -4,6 +4,7 @@ import (
 	"RemiAPI/db"
 	"RemiAPI/routers"
 	"RemiAPI/utils"
+	"RemiAPI/websocket"
 	"fmt"
 	"log"
 	"net/http"
@@ -45,7 +46,10 @@ func main() {
 	// ================== ROUTES ==================
 	router := gin.Default()
 
-	// Public routes (AuthRoutes)
+	router.GET("/ws", func(c *gin.Context) {
+		websocket.WebsocketHandler(c)
+	})
+
 	routers.AuthRoutes(router)
 	routers.UserRoutes(router)
 
