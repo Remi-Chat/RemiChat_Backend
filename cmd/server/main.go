@@ -2,9 +2,10 @@ package main
 
 import (
 	"RemiAPI/db"
+	"RemiAPI/middleware"
 	"RemiAPI/routers"
 	"RemiAPI/utils"
-	"RemiAPI/websocket"
+	"RemiAPI/ws"
 	"fmt"
 	"log"
 	"net/http"
@@ -46,12 +47,23 @@ func main() {
 	// ================== ROUTES ==================
 	router := gin.Default()
 
-	router.GET("/ws", func(c *gin.Context) {
-		websocket.WebsocketHandler(c)
-	})
-
 	routers.AuthRoutes(router)
 	routers.UserRoutes(router)
+
+	router.GET("/ws", func(c *gin.Context) {
+		// Apply authentication middleware
+		authMiddleware := middleware.AuthMiddleware()
+		authMiddleware(c)
+		if c.IsAborted() {
+			return
+		}
+
+		// Extract user data from context
+		userID := c.GetString("user_id")
+
+		// Pass user data to WebSocket handler
+		ws.WebsocketHandler(c, userID)
+	})
 
 	router.GET("/", func(c *gin.Context) {
 		c.String(http.StatusOK, "Public route")

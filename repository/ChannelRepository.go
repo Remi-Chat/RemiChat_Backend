@@ -11,7 +11,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-// NewChannelRepository initializes a new ChannelRepository
 func CreateChannel(ctx context.Context, channel models.Channel) (primitive.ObjectID, error) {
 	result, err := db.ChannelCollection.InsertOne(ctx, channel)
 	if err != nil {
@@ -21,7 +20,6 @@ func CreateChannel(ctx context.Context, channel models.Channel) (primitive.Objec
 	return result.InsertedID.(primitive.ObjectID), nil
 }
 
-// GetChannelByID retrieves a channel by its ID
 func GetChannelByID(ctx context.Context, id primitive.ObjectID) (*models.Channel, error) {
 	var channel models.Channel
 	err := db.ChannelCollection.FindOne(ctx, bson.M{"_id": id}).Decode(&channel)
@@ -31,7 +29,6 @@ func GetChannelByID(ctx context.Context, id primitive.ObjectID) (*models.Channel
 	return &channel, nil
 }
 
-// UpdateChannel updates an existing channel in the database
 func UpdateChannel(ctx context.Context, id primitive.ObjectID, updates bson.M) error {
 	filter := bson.M{"_id": id}
 	update := bson.M{"$set": updates}
@@ -49,7 +46,57 @@ func UpdateChannel(ctx context.Context, id primitive.ObjectID, updates bson.M) e
 	return nil
 }
 
-// DeleteChannel deletes a channel by its ID
+func AddUserToChannel(ctx context.Context, channelID primitive.ObjectID, userID primitive.ObjectID) error {
+	filter := bson.M{"_id": channelID}
+	update := bson.M{"$addToSet": bson.M{"users": userID}}
+
+	result, err := db.ChannelCollection.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return err
+	}
+
+	if result.MatchedCount == 0 {
+		return errors.New("no channel found with the given ID")
+	}
+
+	log.Printf("User added to channel with ID: %v", channelID)
+	return nil
+}
+
+func RemoveUserFromChannel(ctx context.Context, channelID primitive.ObjectID, userID primitive.ObjectID) error {
+	filter := bson.M{"_id": channelID}
+	update := bson.M{"$pull": bson.M{"users": userID}}
+
+	result, err := db.ChannelCollection.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return err
+	}
+
+	if result.MatchedCount == 0 {
+		return errors.New("no channel found with the given ID")
+	}
+
+	log.Printf("User removed from channel with ID: %v", channelID)
+	return nil
+}
+
+func AddMessageToChannel(ctx context.Context, channelID primitive.ObjectID, messageID primitive.ObjectID) error {
+	filter := bson.M{"_id": channelID}
+	update := bson.M{"$addToSet": bson.M{"messages": messageID}}
+
+	result, err := db.ChannelCollection.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return err
+	}
+
+	if result.MatchedCount == 0 {
+		return errors.New("no channel found with the given ID")
+	}
+
+	log.Printf("Message added to channel with ID: %v", channelID)
+	return nil
+}
+
 func DeleteChannel(ctx context.Context, id primitive.ObjectID) error {
 	filter := bson.M{"_id": id}
 

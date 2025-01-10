@@ -49,6 +49,15 @@ func UpdateMessage(ctx context.Context, id primitive.ObjectID, updates bson.M) e
 	return nil
 }
 
+func SaveMessage(ctx context.Context, message *models.Message) (primitive.ObjectID, error) {
+	result, err := db.MessageCollection.InsertOne(ctx, *message)
+	if err != nil {
+		return primitive.NilObjectID, err
+	}
+	log.Printf("Message saved with ID: %v", result.InsertedID)
+	return result.InsertedID.(primitive.ObjectID), nil
+}
+
 // DeleteMessage deletes a message by its ID
 func DeleteMessage(ctx context.Context, id primitive.ObjectID) error {
 	filter := bson.M{"_id": id}
