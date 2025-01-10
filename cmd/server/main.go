@@ -2,18 +2,30 @@ package main
 
 import (
 	"RemiAPI/db"
+	"RemiAPI/routers"
 	"RemiAPI/utils"
 	"fmt"
 	"log"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 )
+
+var err = godotenv.Load()
 
 var mongoURI = utils.GetEnv("MONGO_URI", "mongodb://localhost:27017")
 var dbName = utils.GetEnv("DB_NAME", "remi")
 
 func main() {
+
+	// ================== INITIAL CONFIG ==================
 	fmt.Println("Starting the application...")
+	if err != nil {
+		log.Fatalf("Error loading .env file: %v", err)
+	}
+
+	fmt.Println("Connecting to the database...", mongoURI, dbName)
 
 	client, cleanup, err := db.ConnectToDB(mongoURI, dbName)
 
@@ -30,7 +42,16 @@ func main() {
 
 	log.Println("Application setup completed successfully.")
 
+	// ================== ROUTES ==================
 	router := gin.Default()
+
+	// Public routes (AuthRoutes)
+	routers.AuthRoutes(router)
+	routers.UserRoutes(router)
+
+	router.GET("/", func(c *gin.Context) {
+		c.String(http.StatusOK, "Public route")
+	})
 
 	log.Println("Server running on http://localhost:8080")
 	log.Fatal(router.Run(":8080"))

@@ -10,5 +10,4 @@ type User struct {
 	DisplayPicture string             `bson:"display_picture,omitempty" json:"display_picture,omitempty"`
 	PasswordHash   string             `bson:"password_hash" json:"password_hash"`
 	Gender         string             `bson:"gender,omitempty" json:"gender,omitempty"`
-	// Add other attributes as needed
 }
