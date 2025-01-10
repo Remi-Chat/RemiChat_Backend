@@ -10,6 +10,10 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+var UserCollection *mongo.Collection
+var ChannelCollection *mongo.Collection
+var MessageCollection *mongo.Collection
+
 func ConnectToDB(uri, dbName string) (*mongo.Database, func(), error) {
 	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
 	if err != nil {
@@ -23,6 +27,11 @@ func ConnectToDB(uri, dbName string) (*mongo.Database, func(), error) {
 	}
 
 	db := client.Database(dbName)
+
+	UserCollection = db.Collection("users")
+	ChannelCollection = db.Collection("channels")
+	MessageCollection = db.Collection("messages")
+
 	return db, cleanup, nil
 }
 

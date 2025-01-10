@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"RemiAPI/db"
 	"RemiAPI/models"
 	"context"
 	"errors"
@@ -8,24 +9,11 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
-// UserRepository defines a struct for handling user operations
-type UserRepository struct {
-	collection *mongo.Collection
-}
-
-// NewUserRepository initializes a new UserRepository
-func NewUserRepository(db *mongo.Database) *UserRepository {
-	return &UserRepository{
-		collection: db.Collection("users"),
-	}
-}
-
 // CreateUser inserts a new user into the database
-func (r *UserRepository) CreateUser(ctx context.Context, user models.User) (primitive.ObjectID, error) {
-	result, err := r.collection.InsertOne(ctx, user)
+func CreateUser(ctx context.Context, user models.User) (primitive.ObjectID, error) {
+	result, err := db.UserCollection.InsertOne(ctx, user)
 	if err != nil {
 		return primitive.NilObjectID, err
 	}
@@ -34,9 +22,9 @@ func (r *UserRepository) CreateUser(ctx context.Context, user models.User) (prim
 }
 
 // GetUserByID retrieves a user by their ID
-func (r *UserRepository) GetUserByID(ctx context.Context, id primitive.ObjectID) (*models.User, error) {
+func GetUserByID(ctx context.Context, id primitive.ObjectID) (*models.User, error) {
 	var user models.User
-	err := r.collection.FindOne(ctx, bson.M{"_id": id}).Decode(&user)
+	err := db.UserCollection.FindOne(ctx, bson.M{"_id": id}).Decode(&user)
 	if err != nil {
 		return nil, err
 	}
@@ -44,9 +32,9 @@ func (r *UserRepository) GetUserByID(ctx context.Context, id primitive.ObjectID)
 }
 
 // GetUserByEmail retrieves a user by their email ID
-func (r *UserRepository) GetUserByEmail(ctx context.Context, email string) (*models.User, error) {
+func GetUserByEmail(ctx context.Context, email string) (*models.User, error) {
 	var user models.User
-	err := r.collection.FindOne(ctx, bson.M{"email_id": email}).Decode(&user)
+	err := db.UserCollection.FindOne(ctx, bson.M{"email_id": email}).Decode(&user)
 	if err != nil {
 		return nil, err
 	}
@@ -54,11 +42,11 @@ func (r *UserRepository) GetUserByEmail(ctx context.Context, email string) (*mod
 }
 
 // UpdateUser updates an existing user in the database
-func (r *UserRepository) UpdateUser(ctx context.Context, id primitive.ObjectID, updates bson.M) error {
+func UpdateUser(ctx context.Context, id primitive.ObjectID, updates bson.M) error {
 	filter := bson.M{"_id": id}
 	update := bson.M{"$set": updates}
 
-	result, err := r.collection.UpdateOne(ctx, filter, update)
+	result, err := db.UserCollection.UpdateOne(ctx, filter, update)
 	if err != nil {
 		return err
 	}
@@ -72,10 +60,10 @@ func (r *UserRepository) UpdateUser(ctx context.Context, id primitive.ObjectID, 
 }
 
 // DeleteUser deletes a user by their ID
-func (r *UserRepository) DeleteUser(ctx context.Context, id primitive.ObjectID) error {
+func DeleteUser(ctx context.Context, id primitive.ObjectID) error {
 	filter := bson.M{"_id": id}
 
-	result, err := r.collection.DeleteOne(ctx, filter)
+	result, err := db.UserCollection.DeleteOne(ctx, filter)
 	if err != nil {
 		return err
 	}
